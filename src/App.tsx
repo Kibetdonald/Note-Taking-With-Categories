@@ -4,6 +4,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import {Container} from "react-bootstrap";
 import NewNote from "./Components/NewNote";
 import { useLocalStorage } from "./useLocalStorage";
+import {v4 as uuidV4} from "uuid";
+import NoteForm from "./Components/NoteForm";
+import NoteList from "./Components/NoteList";
 
 export type Note = {
   id: string
@@ -38,11 +41,27 @@ function App() {
       return {...note, tags:tags.filter(tag => note.tagIds.includes(tag.id))}
     })
   }, [notes, tags])
+  function onCreateNote({tags, ...data}: NoteData){
+    setNotes(prevNotes =>{
+      return [...prevNotes, {...data, id: uuidV4(), tagIds: tags.map(tag => tag.id)
+      },]
+
+    })
+  }
+  function addTag(tag: Tag){
+    setTags(prev => [...prev, tag])
+  }
   return (
     <Container className="my-4">
       <Routes>
-        <Route path="/" exact element={<h1>H3</h1>} />
-        <Route path="/new" exact element={<NewNote/>} />
+        <Route path="/" element={<NoteList availableTags={tags}/>} />
+        <Route path="/new" element={
+              <NewNote onSubmit={onCreateNote}
+                        onAddTag = {addTag}
+                        availableTags={tags} 
+              />
+            } 
+              />
         <Route path="*" element={<Navigate to="/" />} />
         <Route path="/:id">
           <Route index element={<h1>Show</h1>} />
